@@ -1,0 +1,17 @@
+version: "3.7"
+
+services:
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app
+    environment:
+      - WOMPI_PUBLIC_KEY=${WOMPI_PUBLIC_KEY}
+      - WOMPI_PRIVATE_KEY=${WOMPI_PRIVATE_KEY}
+      - WOMPI_ENV=${WOMPI_ENV:-production}
+      - WOMPI_EVENT_KEY=${WOMPI_EVENT_KEY}
+      - WOMPI_INTEGRITY_KEY=${WOMPI_INTEGRITY_KEY}
