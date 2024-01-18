@@ -2,6 +2,9 @@ from core.application.use_cases.create_payment_use_case import CreatePaymentUseC
 from core.application.use_cases.get_terms_and_conditions_use_case import (
     GetTermsAndConditionsUseCase,
 )
+from core.application.use_cases.update_payment_status_use_case import (
+    UpdatePaymentStatusUseCase,
+)
 from core.infrastructure.injection.inject_fetch_terms_and_conditions_service import (
     inject_fetch_terms_and_conditions_service,
 )
@@ -14,7 +17,7 @@ from core.infrastructure.injection.inject_send_transaction_service import (
 )
 
 
-def inject_create_payment_use_case():
+def inject_create_payment_use_case() -> CreatePaymentUseCase:
     return CreatePaymentUseCase(
         payment_repository=inject_payment_repository(),
         user_repository=inject_user_repository(),
@@ -22,7 +25,13 @@ def inject_create_payment_use_case():
     )
 
 
-def inject_get_terms_and_conditions_use_case():
+def inject_get_terms_and_conditions_use_case() -> GetTermsAndConditionsUseCase:
     return GetTermsAndConditionsUseCase(
         fetch_terms_and_conditions_service=inject_fetch_terms_and_conditions_service(),
+    )
+
+
+def inject_update_payment_status_use_case() -> UpdatePaymentStatusUseCase:
+    return UpdatePaymentStatusUseCase(
+        payment_repository=inject_payment_repository(),
     )

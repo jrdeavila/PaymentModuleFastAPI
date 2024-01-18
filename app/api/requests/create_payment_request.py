@@ -1,6 +1,12 @@
 from pydantic import BaseModel, Field
 
-from core.domain.entities.payment import NequiPaymentData, Payment
+from core.domain.entities.payment import (
+    BancolombiaPaymentData,
+    CreditCardPaymentData,
+    DaviplataPaymentData,
+    NequiPaymentData,
+    Payment,
+)
 
 
 class CreatePaymentRequest(BaseModel):
@@ -9,7 +15,7 @@ class CreatePaymentRequest(BaseModel):
         default="Nequi",
         description="Type of payment",
         example="Nequi",
-        pattern="Nequi|Bancolombia|CreditCard",
+        pattern="Nequi|Bancolombia|CreditCard|Daviplata",
     )
     payment_data: dict = Field(
         description="Data of payment",
@@ -38,11 +44,16 @@ class CreatePaymentRequest(BaseModel):
                 number_phone=self.payment_data["number_phone"]
             )
         elif self.payment_type == "Bancolombia":
-            payment_data = NequiPaymentData(
+            payment_data = BancolombiaPaymentData(
                 account_number=self.payment_data["account_number"]
             )
+        elif self.payment_type == "Daviplata":
+            payment_data = DaviplataPaymentData(
+                dni_type=self.payment_data["dni_type"],
+                dni_number=self.payment_data["dni_number"],
+            )
         elif self.payment_type == "CreditCard":
-            payment_data = NequiPaymentData(
+            payment_data = CreditCardPaymentData(
                 owner_name=self.payment_data["owner_name"],
                 number_card=self.payment_data["number_card"],
                 cvv=self.payment_data["cvv"],

@@ -2,6 +2,7 @@ from core.domain.entities.user import User
 from core.domain.entities.payment import (
     BancolombiaPaymentData,
     CreditCardPaymentData,
+    DaviplataPaymentData,
     NequiPaymentData,
     Payment,
 )
@@ -30,24 +31,18 @@ class BancolombiaTransactionPaymentMethod(TransactionPaymentMethod):
         self.account_number = account_number
 
 
-class CreditCardTransactionPaymentMethod(TransactionPaymentMethod):
-    owner_name: str
-    number_card: str
-    cvv: str
-    expiration_date: str
+class DaviplataTransactionPaymentMethod(TransactionPaymentMethod):
+    user_legal_id_type: str
+    user_legal_id: str
 
     def __init__(
         self,
-        owner_name: str,
-        number_card: str,
-        cvv: str,
-        expiration_date: str,
+        user_legal_id_type: str,
+        user_legal_id: str,
     ) -> None:
-        super().__init__(payment_description="Payment via CreditCard to Motodomi")
-        self.owner_name = owner_name
-        self.number_card = number_card
-        self.cvv = cvv
-        self.expiration_date = expiration_date
+        super().__init__(payment_description="Payment via Daviplata to Motodomi")
+        self.user_legal_id_type = user_legal_id_type
+        self.user_legal_id = user_legal_id
 
 
 class Transaction:
@@ -85,12 +80,10 @@ def transaction_from_payment_and_user(payment: Payment, user: User) -> Transacti
             account_number=payment.payment_data.account_number
         )
 
-    if type(payment.payment_data) == CreditCardPaymentData:
-        payment_method = CreditCardTransactionPaymentMethod(
-            owner_name=payment.payment_data.owner_name,
-            number_card=payment.payment_data.number_card,
-            cvv=payment.payment_data.cvv,
-            expiration_date=payment.payment_data.expiration_date,
+    if type(payment.payment_data) == DaviplataPaymentData:
+        payment_method = DaviplataTransactionPaymentMethod(
+            user_legal_id_type=payment.payment_data.dni_type,
+            user_legal_id=payment.payment_data.dni_number,
         )
 
     return Transaction(

@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 import uvicorn
+from api.controllers.on_trasanction_change_event_controller import (
+    OnTransactionChangeEventCtrl,
+)
 
 from api.controllers.payment_controller import PaymentCtrl
 from api.controllers.terms_and_conditions_controller import TermsAndConditionController
@@ -27,6 +30,12 @@ app.include_router(
     prefix="/api/v1/terms-and-conditions",
     tags=["Terms and Conditions"],
     responses={404: {"description": "Not found"}},
+)
+
+app.include_router(
+    OnTransactionChangeEventCtrl().router,
+    prefix="/api/v1/on-transaction-change-event",
+    tags=["On Transaction Change Event"],
 )
 
 # -----------------------------------------------------------------

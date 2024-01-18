@@ -43,6 +43,22 @@ class BancolombiaPaymentData(_PaymentData):
         }
 
 
+class DaviplataPaymentData(_PaymentData):
+    dni_type: str
+    dni_number: str
+    payment_type: str = "Daviplata"
+
+    def __init__(self, **data: dict) -> None:
+        super().__init__(**data)
+
+    def to_dict(self) -> dict:
+        return {
+            "payment_type": self.payment_type,
+            "dni_type": self.dni_type,
+            "dni_number": self.dni_number,
+        }
+
+
 class CreditCardPaymentData(_PaymentData):
     owner_name: str
     number_card: str

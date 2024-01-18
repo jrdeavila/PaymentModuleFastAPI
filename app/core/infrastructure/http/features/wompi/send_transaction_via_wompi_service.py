@@ -6,7 +6,7 @@ import httpx
 from core.application.exceptions.message_exception import MessageException
 from core.domain.entities.transaction import (
     BancolombiaTransactionPaymentMethod,
-    CreditCardTransactionPaymentMethod,
+    DaviplataTransactionPaymentMethod,
     NequiTransactionPaymentMethod,
     Transaction,
     TransactionResult,
@@ -73,12 +73,15 @@ def transaction_to_wompi_transaction(transaction: Transaction) -> WompiTransacti
     if type(transaction.payment_method) == BancolombiaTransactionPaymentMethod:
         payment_method = {
             "type": "BANCOLOMBIA_TRANSFER",
+            "user_type": "PERSON",
         }
         payment_method.update(vars(transaction.payment_method))
 
-    if type(transaction.payment_method) == CreditCardTransactionPaymentMethod:
+    if type(transaction.payment_method) == DaviplataTransactionPaymentMethod:
         payment_method = {
-            "type": "CREDIT_CARD",
+            "type": "DAVIPLATA",
+            "installments": 1,
+            "user_type": "PERSON",
         }
         payment_method.update(vars(transaction.payment_method))
 
