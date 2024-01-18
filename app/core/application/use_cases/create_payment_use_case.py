@@ -30,6 +30,8 @@ class CreatePaymentUseCase:
                 404,
             )
         transaction = transaction_from_payment_and_user(payment, user)
-        res = self.send_transaction_service.send(transaction)
-        print(res)
-        return payment
+        transaction_result = self.send_transaction_service.send(transaction)
+        payment.id = transaction_result.id
+        payment.status = transaction_result.status
+        payment.reference = transaction_result.reference
+        return self.payment_repository.create(payment)

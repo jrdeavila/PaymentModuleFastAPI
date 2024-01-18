@@ -64,7 +64,14 @@ class Transaction:
 
 
 class TransactionResult:
-    pass
+    id: str
+    status: str
+    reference: str
+
+    def __init__(self, id: str, status: str, reference: str) -> None:
+        self.id = id
+        self.status = status
+        self.reference = reference
 
 
 def transaction_from_payment_and_user(payment: Payment, user: User) -> Transaction:

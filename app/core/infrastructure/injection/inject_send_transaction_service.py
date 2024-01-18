@@ -8,8 +8,11 @@ import os
 
 def inject_send_transaction_service():
     environment_env_var = os.getenv("WOMPI_ENV")
-    token_env_var = os.getenv("WOMPI_PRIVATE_KEY")
+    private_key_env_var = os.getenv("WOMPI_PRIVATE_KEY")
+    public_key_env_var = os.getenv("WOMPI_PUBLIC_KEY")
 
     return SendTransactionViaWompiService(
-        token=token_env_var, environment=environment_env_var
+        private_key=private_key_env_var,
+        environment=environment_env_var,
+        public_key=public_key_env_var,
     )

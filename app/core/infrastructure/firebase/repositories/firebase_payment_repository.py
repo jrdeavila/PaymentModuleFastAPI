@@ -10,7 +10,12 @@ class FirebasePaymentRepository(PaymentRepository):
         self.firestore_db = firestore_db
 
     def create(self, entity: Payment) -> Payment:
-        self.firestore_db.collection("payments").document(entity.id).set(entity)
+        document = self.firestore_db.collection("payments").document(entity.id)
+        if document.get().exists:
+            raise Exception("Payment already exists")
+        else:
+            document.set(entity.to_dict())
+
         return entity
 
     def get(self, id: str) -> Payment:
@@ -26,7 +31,11 @@ class FirebasePaymentRepository(PaymentRepository):
         return payments
 
     def update(self, entity: Payment) -> Payment:
-        self.firestore_db.collection("payments").document(entity.id).update(entity)
+        document = self.firestore_db.collection("payments").document(entity.id)
+        if document.get().exists:
+            document.update(entity.to_dict())
+        else:
+            raise Exception("Payment not found")
         return entity
 
     def delete(self, id: str) -> None:

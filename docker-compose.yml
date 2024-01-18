@@ -15,3 +15,4 @@ services:
       - WOMPI_ENV=${WOMPI_ENV:-production}
       - WOMPI_EVENT_KEY=${WOMPI_EVENT_KEY}
       - WOMPI_INTEGRITY_KEY=${WOMPI_INTEGRITY_KEY}
+      - APP_NAME=${APP_NAME}

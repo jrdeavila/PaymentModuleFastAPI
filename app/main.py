@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 import uvicorn
 
 from api.controllers.payment_controller import PaymentCtrl
+from api.controllers.terms_and_conditions_controller import TermsAndConditionController
 from core.application.exceptions.message_exception import MessageException
 
 # --------------------------- Variables ---------------------------
@@ -18,6 +19,13 @@ app.include_router(
     PaymentCtrl().router,
     prefix="/api/v1/payment",
     tags=["Payment"],
+    responses={404: {"description": "Not found"}},
+)
+
+app.include_router(
+    TermsAndConditionController().router,
+    prefix="/api/v1/terms-and-conditions",
+    tags=["Terms and Conditions"],
     responses={404: {"description": "Not found"}},
 )
 
@@ -39,5 +47,5 @@ async def message_exception_handler(request, exc: MessageException):
 
 # ------------------------- Run Server ----------------------------
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=is_dev)
 # -----------------------------------------------------------------

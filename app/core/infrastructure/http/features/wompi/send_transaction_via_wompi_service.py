@@ -14,17 +14,20 @@ from core.domain.entities.transaction import (
 from core.domain.services.send_transaction_service import SendTransactionService
 
 
-def create_wompi_reference(customer_email: str, amount_in_cents: int) -> str:
+def create_wompi_reference() -> str:
     app_name = os.getenv("APP_NAME")
-    current_date = datetime.now().strftime("%Y%m%d%H%M%S")
-    return f"{app_name}{customer_email}{amount_in_cents}{current_date}"
+    current_date = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    return f"{current_date}-{app_name}"
 
 
-def create_wompi_signature(reference: str, amount_int_cents: int) -> str:
-    signature_token_env = os.getenv("WOMPI_SIGNATURE_KEY")
-    pattern = f"${reference}{amount_int_cents}COP{signature_token_env}"
-    signature = hashlib.sha256(pattern.encode("utf-8")).hexdigest()
-    return signature
+def create_wompi_signature(
+    reference: str, amount_int_cents: int, currency: str = "COP"
+) -> str:
+    signature_token_env = os.getenv("WOMPI_INTEGRITY_KEY")
+    pattern = f"{reference}{amount_int_cents}{currency}{signature_token_env}"
+    m = hashlib.sha256()
+    m.update(pattern.encode("utf-8"))
+    return m.hexdigest()
 
 
 class WompiTransaction:
@@ -32,30 +35,30 @@ class WompiTransaction:
     currency: str
     customer_email: str
     payment_method: dict
-    reference: str = None
 
     def __init__(self, **data: dict) -> None:
         self.amount_in_cents = data["amount_in_cents"]
         self.currency = data["currency"]
         self.customer_email = data["customer_email"]
         self.payment_method = data["payment_method"]
-        self.reference = create_wompi_reference(
-            self.customer_email, self.amount_in_cents
-        )
+        self.reference = create_wompi_reference()
 
     def to_dict(self) -> dict:
+        signature = self.get_signature()
         return {
             "reference": self.reference,
             "amount_in_cents": self.amount_in_cents,
             "currency": self.currency,
             "customer_email": self.customer_email,
             "payment_method": self.payment_method,
+            "signature": signature,
         }
 
     def get_signature(self) -> str:
         return create_wompi_signature(
             self.reference,
             self.amount_in_cents,
+            self.currency,
         )
 
 
@@ -88,26 +91,33 @@ def transaction_to_wompi_transaction(transaction: Transaction) -> WompiTransacti
 
 
 class SendTransactionViaWompiService(SendTransactionService):
-    token: str
+    public_key: str
+    private_key: str
     environment: str
 
-    def __init__(self, token: str, environment: str) -> None:
-        self.token = token
+    def __init__(self, private_key: str, public_key: str, environment: str) -> None:
+        self.private_key = private_key
+        self.public_key = public_key
         self.environment = environment
 
-    def send(self, transaction: Transaction) -> TransactionResult:
-        wompi_transaction = transaction_to_wompi_transaction(transaction)
-        print(wompi_transaction.to_dict())
-        res = httpx.post(
-            f"https://{self.environment}.wompi.co/v1/transactions",
+    def _get_acceptance_token(self) -> str:
+        res = httpx.get(
+            f"https://{self.environment}.wompi.co/v1/merchants/{self.public_key}",
             headers={
                 "Accept": "application/json",
                 "Content-Type": "application/json",
-                "Authorization": f"Bearer {self.token}",
+                "Authorization": f"Bearer {self.private_key}",
             },
-            json=wompi_transaction.to_dict(),
+            timeout=10,
         )
 
+        acceptance_token: str = res.json()["data"]["presigned_acceptance"][
+            "acceptance_token"
+        ]
+        return acceptance_token
+
+    def _check_status_code(self, res: httpx.Response) -> None:
+        print(res.status_code)
         if res.status_code == 401:
             raise MessageException(
                 "Wompi Authorization Error",
@@ -128,10 +138,43 @@ class SendTransactionViaWompiService(SendTransactionService):
                 "Wompi Unprocessable Entity Error",
                 res.json()["error"]["messages"],
             )
-        if res.status_code != 200:
+        if res.status_code != 201 and res.status_code != 200:
             raise MessageException(
                 "Wompi Unknown Error",
                 res.json(),
             )
 
-        return res.json()
+    def send(self, transaction: Transaction) -> TransactionResult:
+        try:
+            wompi_transaction = transaction_to_wompi_transaction(transaction)
+
+            acceptance_token = self._get_acceptance_token()
+
+            data = {
+                "acceptance_token": acceptance_token,
+            }
+            data.update(wompi_transaction.to_dict())
+
+            res = httpx.post(
+                f"https://{self.environment}.wompi.co/v1/transactions",
+                headers={
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {self.private_key}",
+                },
+                json=data,
+                timeout=10,
+            )
+
+            self._check_status_code(res)
+
+            return TransactionResult(
+                id=res.json()["data"]["id"],
+                status=res.json()["data"]["status"],
+                reference=res.json()["data"]["reference"],
+            )
+        except httpx.ConnectTimeout:
+            raise MessageException(
+                "Wompi Timeout Error",
+                "Wompi is not responding",
+            )
