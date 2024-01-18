@@ -2,7 +2,7 @@ from core.domain.entities.payment import Payment
 from core.domain.repositories.payment_repository import PaymentRepository
 
 
-class UpdatePaymentStatusUseCase:
+class RechargeUserBalanceUseCase:
     payment_repository: PaymentRepository
 
     def __init__(self, payment_repository: PaymentRepository) -> None:
