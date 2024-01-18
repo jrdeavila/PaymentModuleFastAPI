@@ -12,6 +12,9 @@ from core.infrastructure.injection.inject_payment_repository import (
     inject_payment_repository,
     inject_user_repository,
 )
+from core.infrastructure.injection.inject_recharge_user_balance_service import (
+    inject_recharge_user_balance_service,
+)
 from core.infrastructure.injection.inject_send_transaction_service import (
     inject_send_transaction_service,
 )
@@ -34,4 +37,5 @@ def inject_get_terms_and_conditions_use_case() -> GetTermsAndConditionsUseCase:
 def inject_update_payment_status_use_case() -> RechargeUserBalanceUseCase:
     return RechargeUserBalanceUseCase(
         payment_repository=inject_payment_repository(),
+        recharge_user_balance_service=inject_recharge_user_balance_service(),
     )
