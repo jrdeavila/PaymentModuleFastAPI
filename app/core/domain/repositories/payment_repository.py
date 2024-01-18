@@ -15,5 +15,5 @@ class PaymentRepository(AppRepository):
     def get_all(self) -> list[Payment]:
         return super().get_all()
 
-    def update(self, entity: Payment) -> None:
+    def update(self, entity: Payment) -> Payment:
         return super().update(entity)

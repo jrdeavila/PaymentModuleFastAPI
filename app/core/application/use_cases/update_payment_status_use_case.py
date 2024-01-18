@@ -8,6 +8,7 @@ class UpdatePaymentStatusUseCase:
     def __init__(self, payment_repository: PaymentRepository) -> None:
         self.payment_repository = payment_repository
 
-    def execute(self, id: str) -> Payment:
+    def execute(self, id: str, status: str) -> Payment:
         payment = self.payment_repository.get(id)
-        return payment
+        payment.status = status
+        return self.payment_repository.update(payment)
