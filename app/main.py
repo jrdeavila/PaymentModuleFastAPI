@@ -7,6 +7,7 @@ from api.controllers.on_trasanction_change_event_controller import (
 
 from api.controllers.payment_controller import PaymentCtrl
 from api.controllers.terms_and_conditions_controller import TermsAndConditionController
+from api.controllers.user_payments_controller import UserPaymentsController
 from core.application.exceptions.message_exception import MessageException
 
 # --------------------------- Variables ---------------------------
@@ -36,6 +37,12 @@ app.include_router(
     OnTransactionChangeEventCtrl().router,
     prefix="/api/v1/on-transaction-change-event",
     tags=["On Transaction Change Event"],
+)
+
+app.include_router(
+    UserPaymentsController().router,
+    prefix="/api/v1",
+    tags=["User Payments"],
 )
 
 # -----------------------------------------------------------------

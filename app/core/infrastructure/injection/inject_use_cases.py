@@ -2,11 +2,15 @@ from core.application.use_cases.create_payment_use_case import CreatePaymentUseC
 from core.application.use_cases.get_terms_and_conditions_use_case import (
     GetTermsAndConditionsUseCase,
 )
+from core.application.use_cases.get_user_payments_use_case import GetUserPaymentsUseCase
 from core.application.use_cases.rechage_user_balance_use_case import (
     RechargeUserBalanceUseCase,
 )
 from core.infrastructure.injection.inject_fetch_terms_and_conditions_service import (
     inject_fetch_terms_and_conditions_service,
+)
+from core.infrastructure.injection.inject_fetch_user_payments_service import (
+    inject_fetch_user_payments_service,
 )
 from core.infrastructure.injection.inject_payment_repository import (
     inject_payment_repository,
@@ -38,4 +42,11 @@ def inject_update_payment_status_use_case() -> RechargeUserBalanceUseCase:
     return RechargeUserBalanceUseCase(
         payment_repository=inject_payment_repository(),
         recharge_user_balance_service=inject_recharge_user_balance_service(),
+    )
+
+
+def inject_get_user_payments_use_case() -> GetUserPaymentsUseCase:
+    return GetUserPaymentsUseCase(
+        fetch_user_payments_service=inject_fetch_user_payments_service(),
+        user_repository=inject_user_repository(),
     )
