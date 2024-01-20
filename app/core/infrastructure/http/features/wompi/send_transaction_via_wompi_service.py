@@ -12,12 +12,14 @@ from core.domain.entities.transaction import (
     TransactionResult,
 )
 from core.domain.services.send_transaction_service import SendTransactionService
+import pytz
 
 
 def create_wompi_reference() -> str:
-    app_name = os.getenv("APP_NAME")
-    current_date = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    return f"{current_date}-{app_name}"
+    current_date = datetime.now(pytz.timezone("America/Bogota")).strftime(
+        "%Y-%m-%d-%H-%M-%S"
+    )
+    return f"{current_date}"
 
 
 def create_wompi_signature(
