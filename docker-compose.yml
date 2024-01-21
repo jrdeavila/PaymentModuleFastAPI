@@ -5,8 +5,9 @@ services:
     build:
       context: ./app
       dockerfile: Dockerfile
+    container_name: app
     ports:
-        - "${APP_PORT:-8000}:8000"
+      - "${APP_PORT:-8000}:8000"
     volumes:
       - ./app:/app
     environment:
@@ -16,3 +17,15 @@ services:
       - WOMPI_EVENT_KEY=${WOMPI_EVENT_KEY}
       - WOMPI_INTEGRITY_KEY=${WOMPI_INTEGRITY_KEY}
       - APP_NAME=${APP_NAME}
+      - MONGO_CONNECTION_STRING=${MONGO_CONNECTION_STRING}
+
+  mongo:
+    image: mongo:4.4.6
+    container_name: mongo
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    volumes:
+      - ./data/db:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
