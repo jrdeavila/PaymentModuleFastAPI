@@ -15,7 +15,9 @@ from api.auth import auth_routes
 
 # --------------------------- Variables ---------------------------
 is_dev = True
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/token")
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="/api/v1/auth/token", scheme_name="Application Token"
+)
 # -----------------------------------------------------------------
 
 # --------------------------- Main App ----------------------------

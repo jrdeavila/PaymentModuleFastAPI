@@ -8,6 +8,7 @@ class Application(AppEntity):
     email: str
     name: str = None
     disabled: bool = None
+    is_superuser: bool = False
 
     def __init__(self, **data) -> None:
         super().__init__(**data)

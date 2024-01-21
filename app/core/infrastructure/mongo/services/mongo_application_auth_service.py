@@ -23,6 +23,7 @@ class MongoApplicationLoginService(ApplicationLoginService):
         payment_db = self.mongo_client.payment
         collection = payment_db.applications
         doc = collection.find_one({"username": username})
+        print(doc)
         if doc is None:
             raise MessageException(
                 code=404,

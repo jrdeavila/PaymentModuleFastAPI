@@ -4,6 +4,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from api.auth.models import ApplicationToken
 from api.requests.register_application_request import RegisterApplicationRequest
+from core.application.exceptions.message_exception import MessageException
 from core.domain.entities.application import Application
 from core.domain.services.application_auth_service import (
     ApplicationLoginService,
@@ -15,12 +16,30 @@ from core.infrastructure.injection.inject_application_auth_service import (
 )
 
 
+async def get_authenticate_admin_application_token(
+    login_service: Annotated[
+        ApplicationLoginService, Depends(inject_application_login_service)
+    ],
+    form_data: OAuth2PasswordRequestForm = Depends(),
+) -> ApplicationToken:
+    application = login_service.login(
+        username=form_data.username, password=form_data.password
+    )
+    if application.is_superuser:
+        return generate_application_token(application)
+    raise MessageException(
+        code=401,
+        name="Unauthorized",
+        message="The user is not a superuser.",
+    )
+
+
 async def get_authenticate_application_token(
     login_service: Annotated[
         ApplicationLoginService, Depends(inject_application_login_service)
     ],
     form_data: OAuth2PasswordRequestForm = Depends(),
-) -> Union[ApplicationToken, None]:
+) -> ApplicationToken:
     application = login_service.login(
         username=form_data.username, password=form_data.password
     )
@@ -32,7 +51,7 @@ async def get_register_application_token(
         ApplicationRegisterService, Depends(inject_application_register_service)
     ],
     register_application_request: RegisterApplicationRequest,
-) -> ApplicationToken:
+) -> Application:
     application = Application(
         name=register_application_request.name,
         username=register_application_request.username,
@@ -43,7 +62,7 @@ async def get_register_application_token(
         application=application, password=register_application_request.password
     )
 
-    return generate_application_token(application)
+    return application
 
 
 def generate_application_token(application: Application) -> ApplicationToken:
